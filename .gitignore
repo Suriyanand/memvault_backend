@@ -1,0 +1,16 @@
+venv/
+env/
+.venv/
+.env
+.env.local
+chromadb_data/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log

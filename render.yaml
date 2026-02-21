@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: memvault-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: WORKING_MEMORY_LIMIT
+        value: "10"
+      - key: WORKING_MEMORY_TTL
+        value: "1800"
