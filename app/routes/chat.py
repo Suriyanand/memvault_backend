@@ -1,5 +1,6 @@
 import os
 import uuid
+import traceback
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from groq import Groq
@@ -143,4 +144,5 @@ async def chat(request: ChatRequest):
     except HTTPException:
         raise
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

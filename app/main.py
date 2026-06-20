@@ -9,17 +9,23 @@ from app.routes import chat, memory, cost, keys
 
 app = FastAPI(title="MemVault API", version="1.0.0")
 
+frontend_url = os.getenv("FRONTEND_URL")
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://euetozhnussdkgljzrwx.supabase.co",
+]
+if frontend_url:
+    origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://memvault.vercel.app",        # ← your Vercel URL
-        "https://memvault-*.vercel.app",      # ← preview deployments
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(chat.router,   prefix="/api")
 app.include_router(memory.router, prefix="/api")
