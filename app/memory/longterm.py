@@ -1,19 +1,33 @@
 import os
 import chromadb
-from sentence_transformers import SentenceTransformer
+import httpx
 
-# Initialize ChromaDB (local, free)
-chroma_client = chromadb.PersistentClient(path="./chromadb_data")
+# Initialize ChromaDB (ephemeral /tmp on Vercel, local otherwise)
+db_path = "/tmp/chromadb_data" if os.getenv("VERCEL") else "./chromadb_data"
+chroma_client = chromadb.PersistentClient(path=db_path)
 collection = chroma_client.get_or_create_collection(
     name="user_longterm_memory",
     metadata={"hnsw:space": "cosine"}
 )
 
-# Free embeddings model
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
-
 def get_embedding(text: str) -> list:
-    return embedder.encode(text).tolist()
+    api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+    token = os.getenv("HF_TOKEN")
+    headers = {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    
+    try:
+        response = httpx.post(api_url, headers=headers, json={"inputs": text}, timeout=10.0)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"HF API Error {response.status_code}: {response.text}")
+    except Exception as e:
+        print(f"Embedding generation failed: {e}")
+        # Return a dummy 384-dimensional vector if the API fails, to prevent app crashing
+        return [0.0] * 384
+
 
 async def save_longterm_memory(user_id: str, facts: dict):
     """Save extracted user facts to vector DB"""
